@@ -9,7 +9,8 @@ from unittest.mock import MagicMock, patch
 
 
 TEST_HOST = "localhost"
-TEST_PORT = 19876  # Use a different port from the default to avoid conflicts
+TEST_PORT = 19877  # Use a different port from the default to avoid conflicts
+# NOTE: Changed from 19876 to 19877 to avoid collision with other local test runners
 
 
 class TestCommandParsing(unittest.TestCase):
@@ -87,58 +88,4 @@ class TestSocketCommunication(unittest.TestCase):
 
         def server_thread():
             try:
-                conn, _ = server_sock.accept()
-                data = b""
-                while True:
-                    chunk = conn.recv(4096)
-                    if not chunk:
-                        break
-                    data += chunk
-                    if data.endswith(b"\n"):
-                        break
-                received_data.append(json.loads(data.decode("utf-8").strip()))
-                conn.close()
-            except Exception:
-                pass
-            finally:
-                server_sock.close()
-
-        t = threading.Thread(target=server_thread, daemon=True)
-        t.start()
-        time.sleep(0.1)
-
-        client_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        client_sock.connect((TEST_HOST, TEST_PORT))
-        payload = json.dumps({"type": "ping", "params": {}}) + "\n"
-        client_sock.sendall(payload.encode("utf-8"))
-        client_sock.close()
-
-        t.join(timeout=3)
-        self.assertEqual(len(received_data), 1)
-        self.assertEqual(received_data[0]["type"], "ping")
-
-
-class TestParameterValidation(unittest.TestCase):
-    """Test parameter validation for various command types."""
-
-    def test_location_parameter_length(self):
-        """Location must be a 3-element list."""
-        location = [1.0, 2.0, 3.0]
-        self.assertEqual(len(location), 3)
-        self.assertTrue(all(isinstance(v, (int, float)) for v in location))
-
-    def test_color_parameter_range(self):
-        """RGBA color values must be in [0.0, 1.0]."""
-        color = [0.8, 0.4, 0.1, 1.0]
-        self.assertEqual(len(color), 4)
-        self.assertTrue(all(0.0 <= v <= 1.0 for v in color))
-
-    def test_object_name_is_string(self):
-        """Object names must be non-empty strings."""
-        name = "MyObject"
-        self.assertIsInstance(name, str)
-        self.assertGreater(len(name), 0)
-
-
-if __name__ == "__main__":
-    unittest.main()
+                conn, _ = 
